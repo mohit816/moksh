@@ -2,6 +2,7 @@ package com.sample.ecofriendly.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 import java.util.List;
 
@@ -11,21 +12,23 @@ public class Order {
     private String id;
     private String userId;
     private List<Product> products;
-    private String status; // Enum for status: PLACED, SHIPPED, DELIVERED, RETURNED, CANCELED
+    private String status; // PLACED, SHIPPED, DELIVERED, RETURNED, CANCELED
     private Date createdAt;
     private Date updatedAt;
 
+    // Constructors
     public Order() {
     }
 
-    public Order(String userId, List<Product> products, String status) {
+    public Order(String userId, List<Product> products, String status, Date createdAt, Date updatedAt) {
         this.userId = userId;
         this.products = products;
         this.status = status;
-        this.createdAt = new Date();
-        this.updatedAt = new Date();
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
+    // Getters and Setters
     public String getId() {
         return id;
     }

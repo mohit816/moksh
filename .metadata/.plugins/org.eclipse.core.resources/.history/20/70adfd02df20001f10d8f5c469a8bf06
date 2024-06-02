@@ -1,0 +1,45 @@
+package com.sample.ecofriendly.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+    @Autowired
+    private OrderService orderService;
+
+    @PostMapping
+    public ResponseEntity<Order> createOrder(@RequestParam String userId,
+                                             @RequestBody List<Product> products) {
+        Order order = orderService.createOrder(userId, products);
+        return ResponseEntity.ok(order);
+    }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable String orderId,
+                                                   @RequestParam String status) {
+        Order order = orderService.updateOrderStatus(orderId, status);
+        if (order != null) {
+            return ResponseEntity.ok(order);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Order>> getUserOrders(@PathVariable String userId) {
+        List<Order> orders = orderService.getUserOrders(userId);
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/{orderId}")
+    public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
+        Optional<Order> optionalOrder = orderService.getOrderById(orderId);
+        return optionalOrder.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}

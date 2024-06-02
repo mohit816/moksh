@@ -1,0 +1,5 @@
+package com.sample.ecofriendly.controller;
+
+public class WebSocketController {
+
+}

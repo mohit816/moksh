@@ -1,13 +1,17 @@
 package com.sample.ecofriendly.service;
 
-import java.util.Date;
+import java.util.*;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import com.sample.ecofriendly.model.Order;
+import com.sample.ecofriendly.model.OrderStatus;
 import com.sample.ecofriendly.model.Shipment;
+import com.sample.ecofriendly.repository.OrderRepository;
 import com.sample.ecofriendly.repository.ShipmentRepository;
 
 @Service
@@ -15,15 +19,20 @@ public class ShipmentService {
     @Autowired
     private ShipmentRepository shipmentRepository;
 
-    public Shipment createShipment(String orderId, String trackingNumber, String carrier, Date estimatedDeliveryDate) {
-        Shipment shipment = new Shipment();
-        shipment.setOrderId(orderId);
-        shipment.setTrackingNumber(trackingNumber);
-        shipment.setCarrier(carrier);
-        shipment.setShippedAt(new Date());
-        shipment.setEstimatedDeliveryDate(estimatedDeliveryDate);
-        shipment.setStatus("IN_TRANSIT");
-        return shipmentRepository.save(shipment);
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private SimpMessagingTemplate template;
+
+    public Shipment createShipment(String orderId) {
+        Shipment shipment = new Shipment(orderId, "SHIPPED", new Date(), null, new Date());
+        Shipment savedShipment = shipmentRepository.save(shipment);
+
+        // Update order status
+        updateOrderStatus(orderId, "SHIPPED");
+
+        return savedShipment;
     }
 
     public Shipment updateShipmentStatus(String shipmentId, String status) {
@@ -31,12 +40,34 @@ public class ShipmentService {
         if (optionalShipment.isPresent()) {
             Shipment shipment = optionalShipment.get();
             shipment.setStatus(status);
-            return shipmentRepository.save(shipment);
+            shipment.setUpdatedAt(new Date());
+            if (status.equals("DELIVERED")) {
+                shipment.setDeliveredAt(new Date());
+            }
+            shipmentRepository.save(shipment);
+
+            // Update order status
+            updateOrderStatus(shipment.getOrderId(), status);
+
+            return shipment;
         }
         return null;
     }
 
-    public List<Shipment> getShipmentsByOrderId(String orderId) {
+    private void updateOrderStatus(String orderId, String status) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            order.setStatus(status);
+            order.setUpdatedAt(new Date());
+            orderRepository.save(order);
+
+            // Send status update via WebSocket
+            template.convertAndSend("/topic/status", new OrderStatus(orderId, status));
+        }
+    }
+
+    public List<Shipment> getOrderShipments(String orderId) {
         return shipmentRepository.findByOrderId(orderId);
     }
 

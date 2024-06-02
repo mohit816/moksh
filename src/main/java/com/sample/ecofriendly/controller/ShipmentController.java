@@ -1,6 +1,5 @@
 package com.sample.ecofriendly.controller;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,16 +23,14 @@ public class ShipmentController {
     private ShipmentService shipmentService;
 
     @PostMapping
-    public ResponseEntity<Shipment> createShipment(@RequestParam String orderId,
-                                                   @RequestParam String trackingNumber,
-                                                   @RequestParam String carrier,
-                                                   @RequestParam Date estimatedDeliveryDate) {
-        Shipment shipment = shipmentService.createShipment(orderId, trackingNumber, carrier, estimatedDeliveryDate);
+    public ResponseEntity<Shipment> createShipment(@RequestParam String orderId) {
+        Shipment shipment = shipmentService.createShipment(orderId);
         return ResponseEntity.ok(shipment);
     }
 
     @PutMapping("/{shipmentId}/status")
-    public ResponseEntity<Shipment> updateShipmentStatus(@PathVariable String shipmentId, @RequestParam String status) {
+    public ResponseEntity<Shipment> updateShipmentStatus(@PathVariable String shipmentId,
+                                                         @RequestParam String status) {
         Shipment shipment = shipmentService.updateShipmentStatus(shipmentId, status);
         if (shipment != null) {
             return ResponseEntity.ok(shipment);
@@ -43,18 +40,14 @@ public class ShipmentController {
     }
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<List<Shipment>> getShipmentsByOrderId(@PathVariable String orderId) {
-        List<Shipment> shipments = shipmentService.getShipmentsByOrderId(orderId);
+    public ResponseEntity<List<Shipment>> getOrderShipments(@PathVariable String orderId) {
+        List<Shipment> shipments = shipmentService.getOrderShipments(orderId);
         return ResponseEntity.ok(shipments);
     }
 
     @GetMapping("/{shipmentId}")
     public ResponseEntity<Shipment> getShipmentById(@PathVariable String shipmentId) {
-        Optional<Shipment> shipment = shipmentService.getShipmentById(shipmentId);
-        if (shipment.isPresent()) {
-            return ResponseEntity.ok(shipment.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Shipment> optionalShipment = shipmentService.getShipmentById(shipmentId);
+        return optionalShipment.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

@@ -1,0 +1,5 @@
+package com.sample.ecofriendly.config;
+
+public class WebSocketConfig {
+
+}

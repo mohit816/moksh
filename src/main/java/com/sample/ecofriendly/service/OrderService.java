@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.sample.ecofriendly.model.Order;
+import com.sample.ecofriendly.model.OrderStatus;
 import com.sample.ecofriendly.model.Product;
 import com.sample.ecofriendly.repository.OrderRepository;
 
@@ -16,13 +18,11 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private SimpMessagingTemplate template;
+
     public Order createOrder(String userId, List<Product> products) {
-        Order order = new Order();
-        order.setUserId(userId);
-        order.setProducts(products);
-        order.setStatus("PLACED");
-        order.setCreatedAt(new Date());
-        order.setUpdatedAt(new Date());
+        Order order = new Order(userId, products, "PLACED", new Date(), new Date());
         return orderRepository.save(order);
     }
 
@@ -32,7 +32,11 @@ public class OrderService {
             Order order = optionalOrder.get();
             order.setStatus(status);
             order.setUpdatedAt(new Date());
-            return orderRepository.save(order);
+            orderRepository.save(order);
+
+            // Send status update via WebSocket
+            template.convertAndSend("/topic/status", new OrderStatus(orderId, status));
+            return order;
         }
         return null;
     }

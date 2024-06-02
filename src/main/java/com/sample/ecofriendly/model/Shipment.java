@@ -1,68 +1,55 @@
 package com.sample.ecofriendly.model;
 
-import java.util.Date;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
+
 @Document(collection = "shipments")
 public class Shipment {
-	@Id
+    @Id
     private String id;
     private String orderId;
-    private String trackingNumber;
-    private String carrier;
+    private String status; // SHIPPED, IN_TRANSIT, DELIVERED
     private Date shippedAt;
-    private Date estimatedDeliveryDate;
-    private String status; // Enum for status: IN_TRANSIT, OUT_FOR_DELIVERY, DELIVERED
+    private Date deliveredAt;
+    private Date updatedAt;
 
     // Constructors
     public Shipment() {
     }
 
-    public Shipment(String id,String orderId, String trackingNumber, String carrier, Date shippedAt, Date estimatedDeliveryDate, String status) {
-       this.id=id;
-    	this.orderId = orderId;
-        this.trackingNumber = trackingNumber;
-        this.carrier = carrier;
-        this.shippedAt = shippedAt;
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
+    public Shipment(String orderId, String status, Date shippedAt, Date deliveredAt, Date updatedAt) {
+        this.orderId = orderId;
         this.status = status;
+        this.shippedAt = shippedAt;
+        this.deliveredAt = deliveredAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters and Setters
-    
-    
-    
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getOrderId() {
         return orderId;
     }
 
-    public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public void setOrderId(String orderId) {
+    public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
 
-    public String getTrackingNumber() {
-        return trackingNumber;
+    public String getStatus() {
+        return status;
     }
 
-    public void setTrackingNumber(String trackingNumber) {
-        this.trackingNumber = trackingNumber;
-    }
-
-    public String getCarrier() {
-        return carrier;
-    }
-
-    public void setCarrier(String carrier) {
-        this.carrier = carrier;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public Date getShippedAt() {
@@ -73,19 +60,19 @@ public class Shipment {
         this.shippedAt = shippedAt;
     }
 
-    public Date getEstimatedDeliveryDate() {
-        return estimatedDeliveryDate;
+    public Date getDeliveredAt() {
+        return deliveredAt;
     }
 
-    public void setEstimatedDeliveryDate(Date estimatedDeliveryDate) {
-        this.estimatedDeliveryDate = estimatedDeliveryDate;
+    public void setDeliveredAt(Date deliveredAt) {
+        this.deliveredAt = deliveredAt;
     }
 
-    public String getStatus() {
-        return status;
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

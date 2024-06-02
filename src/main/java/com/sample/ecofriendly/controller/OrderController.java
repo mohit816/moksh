@@ -25,13 +25,15 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@RequestParam String userId, @RequestBody List<Product> products) {
+    public ResponseEntity<Order> createOrder(@RequestParam String userId,
+                                             @RequestBody List<Product> products) {
         Order order = orderService.createOrder(userId, products);
         return ResponseEntity.ok(order);
     }
 
     @PutMapping("/{orderId}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable String orderId, @RequestParam String status) {
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable String orderId,
+                                                   @RequestParam String status) {
         Order order = orderService.updateOrderStatus(orderId, status);
         if (order != null) {
             return ResponseEntity.ok(order);
@@ -48,11 +50,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
-        Optional<Order> order = orderService.getOrderById(orderId);
-        if (order.isPresent()) {
-            return ResponseEntity.ok(order.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Optional<Order> optionalOrder = orderService.getOrderById(orderId);
+        return optionalOrder.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
